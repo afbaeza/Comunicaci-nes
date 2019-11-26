@@ -6,6 +6,8 @@
 
 ```console
 $ git clone https://github.com/afbaeza/Comunicaciones.git
+$ cd Comunicaciones
+$ npm install
 ```
 
 * Subir cambios al repositorio
@@ -14,6 +16,7 @@ $ git clone https://github.com/afbaeza/Comunicaciones.git
 $ git status
 $ git add modifiedFile
 $ git status
+$ git pull
 $ git commit -m "Descripcion del commit"
 $ git push -u origin master
 ```
