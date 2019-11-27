@@ -21,8 +21,6 @@ function contentString(id, lat, lng, potenciaI, potenciaA) {
         '</div>'+
     '</div>';
 
-    console.log(content);
-
     return content
 }
 var markets = []
@@ -107,4 +105,4 @@ async function initMap() {
     });*/
 }
 
-google.maps.event.addDomListener(window, 'load', initGoogleMap);
+google.maps.event.addDomListener(window, 'load', initMap);
