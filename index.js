@@ -2,7 +2,9 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const SocketIo = require('socket.io');
-const pg = require('./conecctions/pg');
+
+
+const queries = require('./queries')
 
 const app = express();
 
@@ -15,28 +17,19 @@ var io = SocketIo.listen(server);
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Execute Queries
 
-var postes = undefined;
-
-async function query(){
-  postes = await pg.query('SELECT * FROM public.poste');
-
-  var {rows} = postes;
-  postes = rows;
-  console.log(rows)
-}
-
-query()
+queries.module.postes()
 
 io.on('connection', async function(socket) {
   console.log('client connected');
 
   socket.on('server:postes', async function(data) {
 
-    await query()
+    await queries.module.postes()
 
     await io.emit('client:postes', {
-      postes: postes
+      postes: queries.module.postesData
     })
 
     function intervalFunc() {
