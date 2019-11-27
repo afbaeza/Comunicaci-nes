@@ -3,8 +3,8 @@
 const pg = require("pg");
 
 const conString = "pg://postgres:admin@localhost:5432/Comunicaciones";
-//                     \_______/ \___/ \_______/ \__/ \________________/
-//                       user    pass    host   port        database
+//                     \_______/ \___/ \_______/ \__/ \_____________/
+//                       user    pass    host   port     database
 
 const client = new pg.Client(conString);
 

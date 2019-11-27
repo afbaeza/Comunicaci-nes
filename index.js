@@ -32,13 +32,19 @@ io.on('connection', async function(socket) {
       postes: queries.module.postesData
     })
 
-    function intervalFunc() {
-      io.emit('arduino:data', {
-        value: parseInt(random(1, 100))
-      })
-    }
+    socket.on('server:id', function(data) {
+
+      console.log('data : ', data)
     
-    setInterval(intervalFunc,500);
+      function intervalFunc() {
+        io.emit('arduino:data', {
+          value: parseInt(random(1, 100)),
+          id: data.id
+        })
+      }
+      
+      setInterval(intervalFunc,500);
+    })
 
   });
 
@@ -53,5 +59,7 @@ app.get('/', function (request, response) {
 function random(low, high) {
   return Math.random() * (high - low) + low
 }
+
+
 
 

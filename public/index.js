@@ -26,8 +26,8 @@ function contentString(id, lat, lng, potenciaI, potenciaA) {
 var markets = []
 
 socket.on('arduino:data', function (data) {
-    var potenciaI = document.getElementById('potencia-i-1');
-    var potenciaA = document.getElementById('potencia-a-1');
+    var potenciaI = document.getElementById('potencia-i-'+data.id);
+    var potenciaA = document.getElementById('potencia-a-'+data.id);
     potenciaI.innerHTML = 'P Instantanea: ' + data.value;
     potenciaA.innerHTML = 'P Acumulada: ' + data.value;
 })
@@ -60,6 +60,13 @@ socket.on('client:postes', function (data) {
             );
 
             infoWindow.open(map, marker);
+
+            console.log('server:id', poste.poste_id)
+            console.log('socket', socket)
+
+            socket.emit('server:id', {
+                id: poste.poste_id
+            });
         });
     }
 
