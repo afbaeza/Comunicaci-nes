@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const SocketIo = require('socket.io');
+var bodyParser = require('body-parser')
 
 
 const queries = require('./queries')
@@ -11,6 +12,13 @@ const app = express();
 var server = app.listen(3000, () => {
   console.log("Server on port 3000")
 });
+
+ 
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+ 
+// parse application/json
+app.use(bodyParser.json())
 
 var io = SocketIo.listen(server);
 
@@ -53,6 +61,11 @@ io.on('connection', async function(socket) {
 
 app.get('/', function (request, response) {
   response.render('index.html');
+})
+
+app.post('/data', function(request, response) {
+  console.log(request.body);
+  response.send('Received');
 })
 
 
