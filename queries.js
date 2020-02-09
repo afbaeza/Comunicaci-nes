@@ -25,5 +25,15 @@ exports.module = {
             potencia, poste_id, corriente_pico, intensidad_rms)
             VALUES ($1, $2, $3, $4);
         `, [potencia, poste_id, ip, irms]);
+    },
+    registrarPoste: async function(lat, lon) {
+        var result = await pg.query(`
+            INSERT INTO public.poste(
+                latitud, longitud)
+                VALUES ($1, $2)  RETURNING poste_id;
+        `, [lat, lon]);
+        var {rows} = result;
+        var id = rows[0].poste_id;
+        return id;
     }
 }

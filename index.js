@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const http = require('http');
 const SocketIo = require('socket.io');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 
 
 const queries = require('./queries')
@@ -24,6 +24,9 @@ var io = SocketIo.listen(server);
 
 // static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
 
 // Execute Queries
 
@@ -60,10 +63,10 @@ io.on('connection', async function(socket) {
 
 
 app.get('/', function (request, response) {
-  response.render('index.html');
+  response.render('index');
 })
 
-app.post('/data', function(request, response) {
+app.post('/data', async function(request, response) {
   // request.body es de tipo JSON y tiene la siguiente estructura
   // { id: 1, ip: 6.2343, irms: 3.4534, potencia: 3.4323 }
   // donde:
@@ -79,9 +82,21 @@ app.post('/data', function(request, response) {
   var {id, ip, irms, potencia} = request.body;
 
   // Guardar los datos en la base de datos
-  queries.module.insertMedicion(id, ip, irms, potencia);
+ await  queries.module.insertMedicion(id, ip, irms, potencia);
   console.log('Data was saved sucessfull');
   response.status(200).send('OK');
+})
+
+app.get('/registrar-poste', function (request, response) {
+  response.render('registrar-poste');
+});
+
+app.post('/registrar-poste', async function(request, response) {
+  var {latitud, longitud} = request.body;
+  var poste_id = await queries.module.registrarPoste(latitud, longitud);
+  response.render('identificador-poste', {
+    poste_id: poste_id
+  });
 })
 
 
