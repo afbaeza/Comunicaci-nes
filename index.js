@@ -65,6 +65,7 @@ app.get('/', function (request, response) {
 
 app.post('/data', function(request, response) {
   console.log(request.body);
+  console.log(request.body.ip);
   response.send('Received');
 })
 
