@@ -12,10 +12,12 @@ CREATE TABLE IF NOT EXISTS "Comunicaciones"."public"."poste" (
 );
 
 CREATE TABLE IF NOT EXISTS "Comunicaciones"."public"."potencia" (
-    "potencia_id"  SERIAL   NOT NULL,
-    "potencia"     INT      NOT NULL,
-    "created_at"   TIMESTAMPTZ DEFAULT Now(),
-    "poste_id" INT NOT NULL,
+    "potencia_id"     SERIAL   NOT NULL,
+    "potencia"        REAL      NOT NULL,
+    "corriente_pico"  REAL      NOT NULL,
+    "intensidad_rms"  REAL      NOT NULL,
+    "created_at"      TIMESTAMPTZ DEFAULT Now(),
+    "poste_id"        INT NOT NULL,
     CONSTRAINT "fk_poste_id"
         FOREIGN KEY ("poste_id")
             REFERENCES "Comunicaciones"."public"."poste" ("poste_id")

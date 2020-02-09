@@ -64,9 +64,24 @@ app.get('/', function (request, response) {
 })
 
 app.post('/data', function(request, response) {
+  // request.body es de tipo JSON y tiene la siguiente estructura
+  // { id: 1, ip: 6.2343, irms: 3.4534, potencia: 3.4323 }
+  // donde:
+
+  // id: es el identificador del poste en la base de datos
+  // ip: es la Corriente Pico
+  // irms: es la Intensidad RMS
+  // potencia: es la potencia
+
   console.log(request.body);
-  console.log(request.body.ip);
-  response.send('Received');
+
+  // Extraer los datos del formato JSON a variables
+  var {id, ip, irms, potencia} = request.body;
+
+  // Guardar los datos en la base de datos
+  queries.module.insertMedicion(id, ip, irms, potencia);
+  console.log('Data was saved sucessfull');
+  response.status(200).send('OK');
 })
 
 
