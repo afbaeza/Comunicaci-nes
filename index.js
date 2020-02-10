@@ -30,31 +30,46 @@ app.set('views', __dirname + '/views');
 
 // Execute Queries
 
+// optiene todos los postas registrados en la base de datos
 queries.module.postes()
 
+// Realiza una comunicación entre el Cliente (Navegador) y el Servidor
 io.on('connection', async function(socket) {
+  
   console.log('client connected');
-
+ 
   socket.on('server:postes', async function(data) {
 
+    // consulta a la base de datos las coordenadas de los postes
     await queries.module.postes()
 
+    // Envia las coordenadas de los postes al cliente (Navegador)
     await io.emit('client:postes', {
       postes: queries.module.postesData
     })
+
 
     socket.on('server:id', function(data) {
 
       console.log('data : ', data)
     
-      function intervalFunc() {
+      async function intervalFunc() {
+        await queries.module.getMedicion(data.id);
+
+        var {potencia, corriente_pico, intensidad_rms, energia} = queries.module.medicion;
+        // Consumo en Pesos $
+        var consumo = energia*509.53;
+
         io.emit('arduino:data', {
           value: parseInt(random(1, 100)),
-          id: data.id
+          id: data.id,
+          energia: energia,
+          consumo: consumo,
+          potencia_instantanea: potencia
         })
       }
       
-      setInterval(intervalFunc,500);
+      setInterval(intervalFunc, 500);
     })
 
   });
@@ -63,6 +78,7 @@ io.on('connection', async function(socket) {
 
 
 app.get('/', function (request, response) {
+  // Muestra la pagina principal en el navegador
   response.render('index');
 })
 
@@ -80,20 +96,29 @@ app.post('/data', async function(request, response) {
 
   // Extraer los datos del formato JSON a variables
   var {id, ip, irms, potencia} = request.body;
+  
+  var { energia_acumulada } = await queries.module.getEnergiaAcumulada(id);
 
+  var energia = energia_acumulada + (potencia / 3600000);
   // Guardar los datos en la base de datos
- await  queries.module.insertMedicion(id, ip, irms, potencia);
+ await  queries.module.insertMedicion(id, ip, irms, potencia, energia);
   console.log('Data was saved sucessfull');
   response.status(200).send('OK');
 })
 
 app.get('/registrar-poste', function (request, response) {
+  // Muestra el Formulario para registar postes
   response.render('registrar-poste');
 });
 
 app.post('/registrar-poste', async function(request, response) {
+  // optiene los datos del formulario
   var {latitud, longitud} = request.body;
+  
+  // registra los datos en la base de datos
   var poste_id = await queries.module.registrarPoste(latitud, longitud);
+
+  // muestra el identidicador en pantalla
   response.render('identificador-poste', {
     poste_id: poste_id
   });

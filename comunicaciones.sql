@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS "Comunicaciones"."public"."potencia" (
     "potencia"        REAL      NOT NULL,
     "corriente_pico"  REAL      NOT NULL,
     "intensidad_rms"  REAL      NOT NULL,
+    "energia"         REAL      NOT NULL,
     "created_at"      TIMESTAMPTZ DEFAULT Now(),
     "poste_id"        INT NOT NULL,
     CONSTRAINT "fk_poste_id"
