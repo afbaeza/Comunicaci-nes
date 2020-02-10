@@ -7,7 +7,9 @@ var map = undefined;
 
 // Imagen que representa al poste en el mapa
 var markerImg = {
-    lamppost : 'https://i.ibb.co/LgztTNk/lamppost.png'
+    lamppost : 'https://i.ibb.co/LgztTNk/lamppost.png',
+    fail: 'https://i.ibb.co/dgDcFQj/close.png',
+    sucess: 'https://i.ibb.co/68m9fTb/tick.png'
 }
 
 // Esta función modifica el html del marcador dinamicamente
@@ -23,6 +25,7 @@ function contentString(id, lat, lng, potenciaI, energia, consumo) {
                 `<li id="potencia-i-${id}">P Instantanea: ${potenciaI} [W]</li>`+
                 `<li id="energia-${id}">Energia A: ${energia} [Kwh]</li>`+
                 `<li id="consumo-${id}">Consumo: ${consumo}[$] </li>`+
+                `<img id="img-${id}" src="${markerImg.fail}" alt="State" height="30" width="30">`+
             '</ul>'+
         '</div>'+
     '</div>';
@@ -37,10 +40,30 @@ socket.on('arduino:data', function (data) {
     var potenciaI = document.getElementById('potencia-i-'+data.id);
     var energia = document.getElementById('energia-'+data.id);
     var consumo = document.getElementById('consumo-'+data.id);
+    var consumo = document.getElementById('consumo-'+data.id);
+    var stateImg = document.getElementById('img-'+data.id);
 
-    potenciaI.innerHTML = 'P Instantanea: ' + data.potencia_instantanea+' [W]';
-    energia.innerHTML = 'Energia A: ' + data.energia + ' [Kwh]';
-    consumo.innerHTML = 'Consumo:  ' + data.consumo + ' [$]';
+    var state = '';
+    if(data.potencia_instantanea < 5.0) {
+        state = markerImg.fail;
+    } else {
+        state = markerImg.sucess;
+    }
+
+    if(data.potencia_instantanea != null) {
+        potenciaI.innerHTML = 'P Instantanea: ' + data.potencia_instantanea+' [W]';
+    }
+    
+    if(data.energia != null) {
+        energia.innerHTML = 'Energia A: ' + data.energia + ' [Kwh]';
+    }
+    
+    if(data.consumo != null) {
+       consumo.innerHTML = 'Consumo:  ' + round(data.consumo, 4) + ' [$]'; 
+    }
+
+    stateImg.src = state;
+    
 })
 
 
@@ -65,7 +88,7 @@ socket.on('client:postes', function (data) {
             infoWindow.setContent(contentString(
                 poste.poste_id,
                 parseFloat(poste.latitud),
-                parseFloat(poste.longitud), 0, 0)
+                parseFloat(poste.longitud), 0, 0, 0)
             );
 
             infoWindow.open(map, marker);
@@ -106,6 +129,19 @@ async function initMap() {
     await socket.emit('server:postes', {
         flag: true
     });
+}
+
+function round(num, decimales = 2) {
+    var signo = (num >= 0 ? 1 : -1);
+    num = num * signo;
+    if (decimales === 0) //con 0 decimales
+        return signo * Math.round(num);
+    // round(x * 10 ^ decimales)
+    num = num.toString().split('e');
+    num = Math.round(+(num[0] + 'e' + (num[1] ? (+num[1] + decimales) : decimales)));
+    // x * 10 ^ (-decimales)
+    num = num.toString().split('e');
+    return signo * (num[0] + 'e' + (num[1] ? (+num[1] - decimales) : -decimales));
 }
 
 // Pone el mapa en la etiqueta

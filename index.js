@@ -1,3 +1,4 @@
+
 const path = require('path');
 const express = require('express');
 const http = require('http');
@@ -50,23 +51,29 @@ io.on('connection', async function(socket) {
 
 
     socket.on('server:id', function(data) {
-
-      console.log('data : ', data)
     
       async function intervalFunc() {
-        await queries.module.getMedicion(data.id);
 
-        var {potencia, corriente_pico, intensidad_rms, energia} = queries.module.medicion;
-        // Consumo en Pesos $
-        var consumo = energia*509.53;
+        if(data.id) {
+          await queries.module.getMedicion(data.id);
 
-        io.emit('arduino:data', {
-          value: parseInt(random(1, 100)),
-          id: data.id,
-          energia: energia,
-          consumo: consumo,
-          potencia_instantanea: potencia
-        })
+          var {potencia, corriente_pico, intensidad_rms, energia} = queries.module.medicion;
+
+          console.log(queries.module.medicion)
+          var { energia_acumulada } = await queries.module.getEnergiaAcumulada(data.id);
+
+          // Consumo en Pesos $
+          var consumo = (energia_acumulada+energia)*509.53;
+
+          io.emit('arduino:data', {
+            value: parseInt(random(1, 100)),
+            id: data.id,
+            energia: (energia_acumulada + energia),
+            consumo: consumo,
+            potencia_instantanea: potencia
+          })
+        }
+        
       }
       
       setInterval(intervalFunc, 500);
@@ -95,11 +102,12 @@ app.post('/data', async function(request, response) {
   console.log(request.body);
 
   // Extraer los datos del formato JSON a variables
-  var {id, ip, irms, potencia} = request.body;
-  
-  var { energia_acumulada } = await queries.module.getEnergiaAcumulada(id);
+  var {id, potencia} = request.body;
 
-  var energia = energia_acumulada + (potencia / 3600000);
+  var ip=0.0, irms=0.0; 
+
+
+  var energia = potencia / 3600000.0;
   // Guardar los datos en la base de datos
  await  queries.module.insertMedicion(id, ip, irms, potencia, energia);
   console.log('Data was saved sucessfull');
